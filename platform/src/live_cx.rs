@@ -134,7 +134,7 @@ impl Cx {
             return;
         }
     
-        self.apply_error(origin, index, nodes, format!("property: {} target class not found", id))
+        self.apply_error(origin, index, nodes, format!("property: '{}' target class not found", id))
     }
     
     pub fn apply_image_type_not_supported(&mut self, origin: LiveErrorOrigin, index: usize, nodes: &[LiveNode], path: &str) {

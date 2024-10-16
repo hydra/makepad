@@ -50,10 +50,6 @@ impl Widget for HomeView {
 
         self.check_box(id!(show_on_startup_checkbox)).set_selected(cx, config.show_home_on_startup);
 
-        while let Some(item) =  self.view.draw_walk(cx, scope, walk).step() {
-            item.draw_all(cx, scope);
-        }
-
-        DrawStep::done()
+        self.view.draw_walk(cx, scope, walk)
     }
 }

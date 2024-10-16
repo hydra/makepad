@@ -1,13 +1,22 @@
+use std::hash::Hash;
+use std::path::PathBuf;
+use std::sync::Arc;
+use slotmap::{Key, SlotMap};
 use makepad_widgets::*;
 use makepad_widgets::desktop_button::DesktopButtonWidgetRefExt;
 use crate::config;
 use crate::config::Config;
+use crate::documents::{DocumentKey, DocumentKind};
+use crate::documents::image::ImageDocument;
+use crate::documents::text::TextDocument;
+use crate::documents::view::DocumentViewWidgetRefExt;
 
 live_design! {
     import makepad_widgets::base::*;
     import makepad_widgets::theme_desktop_dark::*;
     import makepad_widgets::vectorline::*;
     import crate::home::*;
+    import crate::documents::view::*;
 
     App = {{App}} {
         ui: <Window> {
@@ -68,6 +77,7 @@ live_design! {
                     }
 
                     HomeContainer = <HomeView> {}
+                    DocumentContainer = <DocumentView> {}
                 }
             },
         }
@@ -79,6 +89,7 @@ app_main!(App);
 #[derive(Default)]
 pub struct AppState {
     pub config: Config,
+    pub documents: SlotMap<DocumentKey, Arc<DocumentKind>>
 }
 
 
@@ -95,15 +106,49 @@ impl App {
         config::save(&self.state.config);
     }
 
-    pub fn add_home_tab(&self, cx: &mut Cx) {
+    pub fn add_home_tab(&mut self, cx: &mut Cx) {
         println!("adding home tab");
 
         let dock = self.ui.dock(id!(dock));
         // TODO what is this 'base' argument?
         let tab_id = dock.unique_tab_id(0);
-        //let (tab_bar, pos) = dock.find_tab_bar_of_tab(live_id!(edit_first)).unwrap();
         let tab_bar = live_id!(root);
         dock.create_and_select_tab(cx, tab_bar, tab_id, live_id!(HomeContainer), "Home".to_string(), live_id!(CloseableTab), None);
+    }
+
+    pub fn open_document_tab(&mut self, cx: &mut Cx, path: PathBuf) {
+        println!("adding document tab");
+
+        let document = match path.extension().unwrap().to_str().unwrap() {
+            "txt" => {
+                let text_document = TextDocument::new(path.clone());
+
+                DocumentKind::TextDocument(text_document)
+            },
+            "bmp" | "png" | "jpg" | "jpeg" | "svg" => {
+                let image_document = ImageDocument::new(path.clone());
+
+                DocumentKind::ImageDocument(image_document)
+            },
+            _ => unreachable!()
+        };
+
+        let document_arc = Arc::new(document);
+
+        let document_key = self.state.documents.insert(document_arc.clone());
+
+        // TODO review use of `as_ffi`, should we be using `hash` instead?  Do we need a unique u64 for the document for the tab id...
+        let document_key_ffi = document_key.data().as_ffi();
+
+        let dock = self.ui.dock(id!(dock));
+        // TODO what is this 'base' argument?
+        let tab_id = dock.unique_tab_id(document_key_ffi);
+        let tab_bar = live_id!(root);
+        let widget = dock.create_and_select_tab(cx, tab_bar, tab_id, live_id!(DocumentContainer), "Document".to_string(), live_id!(CloseableTab), None);
+
+        if let Some(mut document_view) = widget.unwrap().as_document_view().borrow_mut() {
+            document_view.set_document(document_arc)
+        }
     }
 }
 
@@ -115,6 +160,12 @@ impl MatchEvent for App {
 
         if self.state.config.show_home_on_startup {
             self.add_home_tab(cx);
+        }
+
+        let documents_to_open = self.state.config.open_document_paths.clone();
+
+        for document_path in documents_to_open {
+            self.open_document_tab(cx, document_path)
         }
     }
 
@@ -169,6 +220,7 @@ impl LiveRegister for App {
     fn live_register(cx: &mut Cx) {
         makepad_widgets::live_design(cx);
         crate::home::live_design(cx);
+        crate::documents::view::live_design(cx);
     }
 }
 impl AppMain for App {

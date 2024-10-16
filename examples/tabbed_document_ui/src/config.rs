@@ -6,12 +6,14 @@ use std::path::PathBuf;
 #[serde(default)]
 pub struct Config {
     pub show_home_on_startup: bool,
+    pub open_document_paths: Vec<PathBuf>
 }
 
 impl Default for Config {
     fn default() -> Self {
         Config {
             show_home_on_startup: true,
+            open_document_paths: vec![],
         }
     }
 }

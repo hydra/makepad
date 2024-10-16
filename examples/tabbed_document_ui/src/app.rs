@@ -67,12 +67,6 @@ live_design! {
                         tabs: []
                     }
 
-                    tab_home = Tab {
-                        name: "Home"
-                        template: CloseableTab,
-                        kind: HomeContainer
-                    }
-
                     HomeContainer = <HomeView> {}
                 }
             },

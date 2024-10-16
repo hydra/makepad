@@ -1,5 +1,6 @@
 use crate::{
     makepad_widgets::*,
+    // FIXME remove this dependency
     app::AppState,
 };
 

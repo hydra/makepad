@@ -1,5 +1,7 @@
 use makepad_widgets::*;
-
+use makepad_widgets::desktop_button::DesktopButtonWidgetRefExt;
+use crate::config;
+use crate::config::Config;
 
 live_design! {
     import makepad_widgets::base::*;
@@ -61,7 +63,7 @@ live_design! {
                     width: Fill,
                     height: Fill,
                     root = Tabs {
-                        tabs: [tab_home]
+                        tabs: []
                     }
 
                     tab_home = Tab {
@@ -89,11 +91,42 @@ app_main!(App);
 #[derive(Live, LiveHook)]
 pub struct App {
     #[live] ui: WidgetRef,
+    #[rust] config: Config,
+}
+
+impl App {
+    pub fn on_shutdown(&self) {
+        println!("on_shutdown");
+
+        config::save(&self.config);
+    }
+
+    pub fn add_home_tab(&self, cx: &mut Cx) {
+        println!("adding home tab");
+
+        let dock = self.ui.dock(id!(dock));
+        // TODO what is this 'base' argument?
+        let tab_id = dock.unique_tab_id(0);
+        //let (tab_bar, pos) = dock.find_tab_bar_of_tab(live_id!(edit_first)).unwrap();
+        let tab_bar = live_id!(root);
+        dock.create_and_select_tab(cx, tab_bar, tab_id, live_id!(HomeContainer), "Home".to_string(), live_id!(CloseableTab), None);
+    }
 }
 
 impl MatchEvent for App {
-    fn handle_startup(&mut self, _cx: &mut Cx) {
+    fn handle_startup(&mut self, cx: &mut Cx) {
         let _ui = self.ui.clone();
+
+        self.config = config::load();
+
+        if self.config.show_home_on_startup {
+            self.add_home_tab(cx);
+        }
+    }
+
+    fn handle_shutdown(&mut self, _cx: &mut Cx) {
+        // FIXME this function is never called, on Windows 11 the Event::Shutdown is never generated. See windows.rs.
+        self.on_shutdown();
     }
 
     fn handle_action(&mut self, cx: &mut Cx, action: &Action) {
@@ -116,15 +149,14 @@ impl MatchEvent for App {
     fn handle_actions(&mut self, cx: &mut Cx, actions: &Actions) {
         //println!("actions: {:?}", actions);
 
-        if self.ui.button(id!(home)).clicked(actions) {
-            println!("adding home tab");
+        // HACK for `handle_shutdown` never being called on windows
+        if self.ui.desktop_button(id!(caption_bar.windows_buttons.close)).clicked(actions) {
+            println!("close clicked");
+            self.on_shutdown();
+        }
 
-            let dock = self.ui.dock(id!(dock));
-            // TODO what is this 'base' argument?
-            let tab_id = dock.unique_tab_id(0);
-            //let (tab_bar, pos) = dock.find_tab_bar_of_tab(live_id!(edit_first)).unwrap();
-            let tab_bar = live_id!(root);
-            dock.create_and_select_tab(cx, tab_bar, tab_id, live_id!(HomeContainer), "Home".to_string(), live_id!(CloseableTab), None);
+        if self.ui.button(id!(home)).clicked(actions) {
+            self.add_home_tab(cx);
         }
 
         let ui = self.ui.clone();

@@ -1,4 +1,5 @@
 use std::path::PathBuf;
+use makepad_widgets::*;
 
 pub struct ImageDocument {
     path: PathBuf,
@@ -11,5 +12,27 @@ impl ImageDocument {
             path,
             coordinate: None,
         }
+    }
+}
+
+live_design!{
+    import makepad_widgets::base::*;
+    import makepad_widgets::theme_desktop_dark::*;
+
+    ImageDocumentView = {{ImageDocumentView}} {
+        <RectView> {
+                <Label> { text: "Image" }
+        }
+    }
+}
+
+#[derive(Live, LiveHook, Widget)]
+pub struct ImageDocumentView {
+    #[deref] view: View
+}
+
+impl Widget for ImageDocumentView {
+    fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
+        self.view.draw_walk(cx, scope, walk)
     }
 }

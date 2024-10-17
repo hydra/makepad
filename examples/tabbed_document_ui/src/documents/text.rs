@@ -1,6 +1,9 @@
 use std::fs;
 use std::path::PathBuf;
+use std::sync::Arc;
 use makepad_widgets::*;
+use crate::documents::DocumentKind;
+use crate::documents::image::{ImageDocument, ImageDocumentView};
 
 pub struct TextDocument {
     path: PathBuf,
@@ -25,18 +28,30 @@ live_design!{
 
     TextDocumentView = {{TextDocumentView}} {
         <RectView> {
-            <Label> { text: "Text" }
+            content = <Label> {}
         }
     }
 }
 
 #[derive(Live, LiveHook, Widget)]
 pub struct TextDocumentView {
-    #[deref] view: View
+    #[deref] view: View,
+    #[rust] document: Option<Arc<TextDocument>>,
 }
 
 impl Widget for TextDocumentView {
     fn draw_walk(&mut self, cx: &mut Cx2d, scope: &mut Scope, walk: Walk) -> DrawStep {
+
+        if let Some(document) = &self.document {
+            self.label(id!(content)).set_text(document.content.as_str());
+        }
+
         self.view.draw_walk(cx, scope, walk)
+    }
+}
+
+impl TextDocumentView {
+    pub fn set_document(&mut self, document: Arc<TextDocument>) {
+        self.document.replace(document);
     }
 }

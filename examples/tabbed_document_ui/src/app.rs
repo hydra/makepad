@@ -122,12 +122,12 @@ impl App {
             "txt" => {
                 let text_document = TextDocument::new(path.clone());
 
-                DocumentKind::TextDocument(text_document)
+                DocumentKind::TextDocument(Arc::new(text_document))
             },
             "bmp" | "png" | "jpg" | "jpeg" | "svg" => {
                 let image_document = ImageDocument::new(path.clone());
 
-                DocumentKind::ImageDocument(image_document)
+                DocumentKind::ImageDocument(Arc::new(image_document))
             },
             _ => unreachable!()
         };

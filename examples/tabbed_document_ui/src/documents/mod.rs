@@ -1,4 +1,5 @@
 use std::fmt::{Debug, Formatter};
+use std::sync::Arc;
 use slotmap::new_key_type;
 use crate::documents::image::ImageDocument;
 use crate::documents::text::TextDocument;
@@ -8,8 +9,8 @@ pub mod image;
 pub mod view;
 
 pub enum DocumentKind {
-    TextDocument(TextDocument),
-    ImageDocument(ImageDocument),
+    TextDocument(Arc<TextDocument>),
+    ImageDocument(Arc<ImageDocument>),
 }
 
 impl Debug for DocumentKind {

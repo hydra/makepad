@@ -23,7 +23,7 @@ live_design!{
 
 #[derive(Live, LiveHook, Widget)]
 pub struct HomeView {
-    #[deref] view:View
+    #[deref] view: View
 }
 
 impl WidgetMatchEvent for HomeView {

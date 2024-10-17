@@ -219,9 +219,11 @@ impl LiveRegister for App {
     fn live_register(cx: &mut Cx) {
         makepad_widgets::live_design(cx);
         crate::home::live_design(cx);
+        crate::documents::text::live_design(cx);
         crate::documents::view::live_design(cx);
     }
 }
+
 impl AppMain for App {
     fn handle_event(&mut self, cx: &mut Cx, event: &Event) {
         self.match_event(cx, event);

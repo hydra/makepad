@@ -9,6 +9,7 @@ live_design!{
     import makepad_widgets::base::*;
     import makepad_widgets::theme_desktop_dark::*;
     import crate::documents::text::*;
+    import crate::documents::image::*;
 
 
     DocumentView = {{DocumentView}} {
@@ -16,9 +17,7 @@ live_design!{
         width: Fill,
 
         TextDocument = <TextDocumentView> {}
-        ImageDocument = <RectView> {
-            <Label> { text: "Image" }
-        }
+        ImageDocument = <ImageDocumentView> {}
     }
 }
 

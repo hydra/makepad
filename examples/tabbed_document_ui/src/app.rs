@@ -220,6 +220,7 @@ impl LiveRegister for App {
         makepad_widgets::live_design(cx);
         crate::home::live_design(cx);
         crate::documents::text::live_design(cx);
+        crate::documents::image::live_design(cx);
         crate::documents::view::live_design(cx);
     }
 }

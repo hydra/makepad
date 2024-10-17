@@ -4,6 +4,8 @@ use crate::{
     makepad_widgets::*,
 };
 use crate::documents::DocumentKind;
+use crate::documents::image::ImageDocumentViewWidgetRefExt;
+use crate::documents::text::TextDocumentViewWidgetRefExt;
 
 live_design!{
     import makepad_widgets::base::*;
@@ -23,7 +25,6 @@ live_design!{
 
 #[derive(Live, LiveRegisterWidget, WidgetRef, WidgetSet)]
 pub struct DocumentView {
-    #[rust] document: Option<Arc<DocumentKind>>,
     #[rust] templates: HashMap<LiveId, LivePtr>,
     #[rust] child: Option<(LiveId, WidgetRef)>,
     #[walk] walk: Walk,
@@ -89,13 +90,24 @@ impl DocumentView {
             DocumentKind::ImageDocument(_) => live_id!(ImageDocument),
         };
 
-
-        self.document.replace(document_arc);
-
         let child_id = LiveId::unique();
 
         if let Some(ptr) = self.templates.get(&template) {
             let child_widget = WidgetRef::new_from_ptr(cx, Some(*ptr));
+
+            match &*document_arc {
+                DocumentKind::TextDocument(text_document) => {
+                    if let Some(mut document_view) = child_widget.as_text_document_view().borrow_mut() {
+                        document_view.set_document(text_document.clone())
+                    }
+                }
+                DocumentKind::ImageDocument(image_document) => {
+                    if let Some(mut document_view) = child_widget.as_image_document_view().borrow_mut() {
+                        document_view.set_document(image_document.clone())
+                    }
+                }
+            }
+
             self.child.replace((child_id, child_widget));
         }
         else {

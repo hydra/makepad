@@ -1,4 +1,3 @@
-use std::hash::Hash;
 use std::path::PathBuf;
 use std::sync::Arc;
 use slotmap::{Key, SlotMap};
@@ -147,7 +146,7 @@ impl App {
         let widget = dock.create_and_select_tab(cx, tab_bar, tab_id, live_id!(DocumentContainer), "Document".to_string(), live_id!(CloseableTab), None);
 
         if let Some(mut document_view) = widget.unwrap().as_document_view().borrow_mut() {
-            document_view.set_document(document_arc)
+            document_view.set_document(document_arc, cx)
         }
     }
 }
@@ -207,7 +206,7 @@ impl MatchEvent for App {
             self.add_home_tab(cx);
         }
 
-        let ui = self.ui.clone();
+        let _ui = self.ui.clone();
 
         for action in actions{
             self.handle_action(cx, action);

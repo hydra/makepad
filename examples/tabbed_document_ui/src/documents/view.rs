@@ -8,14 +8,14 @@ use crate::documents::DocumentKind;
 live_design!{
     import makepad_widgets::base::*;
     import makepad_widgets::theme_desktop_dark::*;
+    import crate::documents::text::*;
+
 
     DocumentView = {{DocumentView}} {
         height: Fill,
         width: Fill,
 
-        TextDocument = <RectView> {
-            <Label> { text: "Text" }
-        }
+        TextDocument = <TextDocumentView> {}
         ImageDocument = <RectView> {
             <Label> { text: "Image" }
         }

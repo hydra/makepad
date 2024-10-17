@@ -27,7 +27,7 @@ pub struct HomeView {
 }
 
 impl WidgetMatchEvent for HomeView {
-    fn handle_actions(&mut self, cx: &mut Cx, actions: &Actions, scope: &mut Scope) {
+    fn handle_actions(&mut self, _cx: &mut Cx, actions: &Actions, scope: &mut Scope) {
         println!("homeview. actions: {:?}", actions);
         if let Some(check) = self.check_box(id!(show_on_startup_checkbox)).changed(actions) {
 
